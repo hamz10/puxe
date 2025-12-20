@@ -35,6 +35,8 @@ namespace control{
         void updateMousePos();
         void drawMouseHover() const;
         void changeMouseElement(entities::ElementType type);
+        std::string_view mouseModeToSV();
+        void cycleMouseMode(bool clockwise);
         static void mouseAction(/*mouseMode mode -- Implemented later!*/);
         [[nodiscard]] int getMouseCellIDX() const;
 
@@ -54,9 +56,14 @@ namespace control{
 
     };
 
-    void updateGridElement(std::vector<entities::Cell>& Grid, Mouse& mouse);
+    void placeGridElement(std::vector<entities::Cell>& Grid, Mouse& mouse);
+    void deleteGridElement(std::vector<entities::Cell>& Grid);
 
     extern Mouse mouse;
+    constexpr std::array<Mouse::mouseMode,static_cast<std::size_t>(Mouse::mouseMode::MAX_MODES)> mouseModes = {
+        {
+            Mouse::mouseMode::Neutral, Mouse::mouseMode::Place,Mouse::mouseMode::Delete,
+        }};
 }
 
 #endif //GRIDRAY_CONTROL_H

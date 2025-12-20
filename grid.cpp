@@ -64,6 +64,13 @@ std::optional<int> grid::checkAdjacentCell(const std::vector<entities::Cell> &ce
             return idx;
         }
     }
+    if (blueprint.m_density < 5) { //check lateral movements for liquids
+        for (int offset: offsets) {
+            if (auto idx {isValidAdjacentCell(cellGrid, blueprint, x+offset, y)}) {
+                return idx;
+            }
+        }
+    }
     return std::nullopt;
 }
 

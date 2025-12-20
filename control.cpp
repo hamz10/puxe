@@ -32,8 +32,42 @@ namespace control {
         std::cout << "Element changed to " << entities::getElemSV(type) << "\n";
     }
 
+    std::string_view Mouse::mouseModeToSV() {
+        switch (mouse.mode) {
+            case Mouse::mouseMode::Neutral: return "Neutral";
+            case Mouse::mouseMode::Place: return "Place";
+            case Mouse::mouseMode::Delete: return "Delete";
+            case Mouse::mouseMode::MAX_MODES:
+            default: assert(false && "mouseModeToSV invalid input");
+        }
+    }
+
+    void Mouse::cycleMouseMode(bool clockwise) {
+    if (clockwise) {
+        if (mouse.mode == mouseModes[static_cast<std::size_t>(Mouse::mouseMode::MAX_MODES) - 1]) {
+        mouse.mode = mouseModes[0];
+        } else {
+            mouse.mode = mouseModes[static_cast<std::size_t>(mouse.mode) + 1];
+        }
+    } else {
+        if (mouse.mode == mouseModes[0]) {
+            mouse.mode = mouseModes[static_cast<std::size_t>(Mouse::mouseMode::MAX_MODES) - 1];
+        } else {
+            mouse.mode = mouseModes[static_cast<std::size_t>(mouse.mode) - 1];
+        }
+    }
+        std::cout << mouseModeToSV() << '\n';
+        return;
+    }
+
+
+
     void Mouse::mouseAction() {
-        control::updateGridElement(entities::cellGrid, control::mouse);
+        if (mouse.mode == Mouse::mouseMode::Place) {
+            control::placeGridElement(entities::cellGrid, control::mouse);
+        } else if (mouse.mode == Mouse::mouseMode::Delete) {
+            control::deleteGridElement(entities::cellGrid);
+        }
     }
 
     int Mouse::getMouseCellIDX() const {
@@ -53,6 +87,12 @@ namespace control {
             case KEY_FOUR:
                 mouse.changeMouseElement(static_cast<entities::ElementType>(input - KEY_ONE));
                 break;
+            case KEY_Q:
+                mouse.cycleMouseMode(false);
+                break;
+            case KEY_E:
+                mouse.cycleMouseMode(true);
+                break;
             default:
                 break;
         }
@@ -60,9 +100,10 @@ namespace control {
 
     void UserInput::isValidKeyPressed(){
         int key {GetKeyPressed()};
-        if (key >= KEY_ZERO && key <= KEY_NINE){
         parseKeyStroke(key);
-        }
+        /*if (key >= KEY_ZERO && key <= KEY_NINE){
+        parseKeyStroke(key);
+        }*/
     }
 
     void UserInput::isMouseDown() {
@@ -71,11 +112,19 @@ namespace control {
         }
     }
 
-    void control::updateGridElement(std::vector<entities::Cell>& Grid, Mouse& mouse){
+    void control::placeGridElement(std::vector<entities::Cell>& Grid, Mouse& mouse){
         const int cell_idx = mouse.getMouseCellIDX();
         assert(cell_idx >= 0 && cell_idx < Grid.size());
         if(Grid.at(cell_idx).type != mouse.current_element && Grid.at(cell_idx).type == entities::ElementType::AIR) {
             Grid.at(cell_idx).type = mouse.current_element;
+        }
+    }
+
+    void control::deleteGridElement(std::vector<entities::Cell>& Grid) {
+        const int cell_idx = mouse.getMouseCellIDX();
+        assert(cell_idx >= 0 && cell_idx < Grid.size());
+        if (Grid.at(cell_idx).type != entities::ElementType::AIR) {
+            Grid.at(cell_idx).type = entities::ElementType::AIR;
         }
     }
 

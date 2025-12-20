@@ -85,7 +85,7 @@ namespace entities {
                 ElementType::STONE,
                 GRAY,
                 -1,
-                -1,
+                constants::STATIC_DENSITY,
                 false
             }
     };

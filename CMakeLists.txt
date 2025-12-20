@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.15)
 project(gridray)
 
 set(CMAKE_CXX_STANDARD 20)
+add_compile_options(-std=c++20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 find_package(raylib CONFIG REQUIRED)

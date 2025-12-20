@@ -5,6 +5,7 @@
 #ifndef GRIDRAY_GRID_H
 #define GRIDRAY_GRID_H
 #include <cassert>
+#include <optional>
 #include "constants.h"
 #include "entities.h"
 
