@@ -6,6 +6,9 @@
 #define GRIDRAY_ENTITIES_H
 
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <iterator>
 #include <string_view>
 #include <cassert>
 #include "constants.h"
@@ -101,6 +104,9 @@ namespace entities {
 
 
     extern std::vector<Cell> cellGrid;
+
+    void saveGridState(std::vector<Cell> &cellGrid);
+    void loadGridState(std::vector<Cell> &cellGrid);
 }
 
 #endif //GRIDRAY_ENTITIES_H

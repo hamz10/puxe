@@ -1,10 +1,10 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
-#include "constants.h"
-#include "entities.h"
-#include "control.h"
-#include "grid.h"
+#include "../include/constants.h"
+#include "../include/entities.h"
+#include "../include/control.h"
+#include "../include/grid.h"
 #include "raylib.h"
 #include "raymath.h"
 #define RAYGUI_IMPLEMENTATION
@@ -27,7 +27,7 @@ void drawScreen(){
 
 int main() {
     InitWindow(constants::WINDOW_WIDTH, constants::WINDOW_HEIGHT, "raylib");
-    SetTargetFPS(24);
+    SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
         update();

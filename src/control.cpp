@@ -2,7 +2,7 @@
 // Created by Hamza Nisar on 16/12/2025.
 //
 #include <iostream>
-#include "control.h"
+#include "../include/control.h"
 
 namespace control {
 
@@ -92,6 +92,12 @@ namespace control {
                 break;
             case KEY_E:
                 mouse.cycleMouseMode(true);
+                break;
+            case KEY_KP_SUBTRACT:
+                entities::saveGridState(entities::cellGrid);
+                break;
+            case KEY_KP_ADD:
+                entities::loadGridState(entities::cellGrid);
                 break;
             default:
                 break;

@@ -1,8 +1,8 @@
 //
 // Created by Hamza Nisar on 16/12/2025.
 //
-#include "grid.h"
-#include "random.h"
+#include "../include/grid.h"
+#include "../include/random.h"
 
 void grid::drawGridLines(Color color) {
     int x{0};
