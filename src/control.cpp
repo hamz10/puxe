@@ -4,6 +4,8 @@
 #include <iostream>
 #include "../include/control.h"
 
+#include "../include/grid.h"
+
 namespace control {
 
     void Mouse::updateMousePos() {
@@ -62,11 +64,11 @@ namespace control {
 
 
 
-    void Mouse::mouseAction() {
+    void Mouse::mouseAction(Mouse& mouse) {
         if (mouse.mode == Mouse::mouseMode::Place) {
-            control::placeGridElement(entities::cellGrid, control::mouse);
+            control::placeGridElement(entities::cellGrid, mouse.positionToPoint());
         } else if (mouse.mode == Mouse::mouseMode::Delete) {
-            control::deleteGridElement(entities::cellGrid);
+            control::deleteGridElement(entities::cellGrid, mouse.positionToPoint());
         }
     }
 
@@ -75,6 +77,9 @@ namespace control {
         return mousePoint.y * constants::WIDTH_PIXEL_COUNT + mousePoint.x;
 
     }
+
+
+
 
     Mouse mouse{};
 
@@ -107,30 +112,36 @@ namespace control {
     void UserInput::isValidKeyPressed(){
         int key {GetKeyPressed()};
         parseKeyStroke(key);
-        /*if (key >= KEY_ZERO && key <= KEY_NINE){
-        parseKeyStroke(key);
-        }*/
+
     }
 
     void UserInput::isMouseDown() {
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-            Mouse::mouseAction();
+            Mouse::mouseAction(mouse);
         }
     }
 
-    void control::placeGridElement(std::vector<entities::Cell>& Grid, Mouse& mouse){
-        const int cell_idx = mouse.getMouseCellIDX();
+    int control::pointToCellIDX(Point& point){
+        return point.y * constants::WIDTH_PIXEL_COUNT + point.x;
+    }
+
+    void control::placeGridElement(std::vector<entities::Cell>& Grid, Point location){
+        const int cell_idx = control::pointToCellIDX(location);
         assert(cell_idx >= 0 && cell_idx < Grid.size());
-        if(Grid.at(cell_idx).type != mouse.current_element && Grid.at(cell_idx).type == entities::ElementType::AIR) {
+        if(Grid.at(cell_idx).type == entities::ElementType::AIR) {
             Grid.at(cell_idx).type = mouse.current_element;
+            grid::insertActiveCells(grid::active_cells, cell_idx);
+            grid::wakeNeighbour(Grid, grid::active_cells, cell_idx, grid::neighbours_middle_bot);
         }
     }
 
-    void control::deleteGridElement(std::vector<entities::Cell>& Grid) {
-        const int cell_idx = mouse.getMouseCellIDX();
+    void control::deleteGridElement(std::vector<entities::Cell>& Grid, Point location) {
+        const int cell_idx = control::pointToCellIDX(location);
         assert(cell_idx >= 0 && cell_idx < Grid.size());
         if (Grid.at(cell_idx).type != entities::ElementType::AIR) {
             Grid.at(cell_idx).type = entities::ElementType::AIR;
+            grid::active_cells.erase(cell_idx);
+            grid::wakeNeighbour(Grid, grid::active_cells, cell_idx, grid::neighbours_middle_top);
         }
     }
 

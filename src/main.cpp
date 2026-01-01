@@ -14,7 +14,7 @@ void update(){
     control::mouse.updateMousePos();
     control::UserInput::isValidKeyPressed();
     control::UserInput::isMouseDown();
-    grid::updateSimulation(entities::cellGrid);
+    grid::updateSimulation(entities::cellGrid, grid::active_cells);
 }
 
 void drawScreen(){
@@ -25,10 +25,15 @@ void drawScreen(){
     EndDrawing();
 }
 
+void init() {
+    grid::initActiveCells(grid::active_cells);
+}
+
 int main() {
-    InitWindow(constants::WINDOW_WIDTH, constants::WINDOW_HEIGHT, "raylib");
+    InitWindow(constants::WINDOW_WIDTH, constants::WINDOW_HEIGHT, "puxe");
     SetTargetFPS(60);
 
+    init();
     while (!WindowShouldClose()) {
         update();
         drawScreen();

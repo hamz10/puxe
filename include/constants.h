@@ -11,7 +11,7 @@ namespace constants {
     constexpr static int PIXEL_SIZE {20};
     constexpr static int WIDTH_PIXEL_COUNT {WINDOW_WIDTH/PIXEL_SIZE}; //50
     constexpr static int HEIGHT_PIXEL_COUNT {WINDOW_HEIGHT/PIXEL_SIZE}; //50
-    constexpr static int GRAVITY {1};
+    //constexpr static int GRAVITY {1};
     constexpr static int STATIC_DENSITY {999};
     constexpr static Color BK_CLR {DARKGRAY};
     constexpr static Color HOVER_CLR {BLUE};

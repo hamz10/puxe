@@ -4,6 +4,16 @@
 #include "../include/grid.h"
 #include "../include/random.h"
 
+void grid::initActiveCells(std::unordered_set<int>& active) {
+    active.clear();
+    active.reserve(5000);
+}
+
+void grid::insertActiveCells(std::unordered_set<int>& active, int cellIDX) {
+    active.insert(cellIDX);
+    entities::cellGrid.at(cellIDX).frames_stationary = 0;
+}
+
 void grid::drawGridLines(Color color) {
     int x{0};
     int y{0};
@@ -74,39 +84,79 @@ std::optional<int> grid::checkAdjacentCell(const std::vector<entities::Cell> &ce
     return std::nullopt;
 }
 
+//MAKE TEMPLATED VERSION FOR DELETION OF BLOCK! WILL HAVE TO TURN ARRAY OF PAIRS INTO A PARAMETER RATHER THAN HARDCODED
 
+template <std::size_t N>
+void grid::wakeNeighbour(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active, const int cellIDX, std::array<std::pair<int,int>,N>& neighbours)
+     {
+    int x {cellIDX % constants::WIDTH_PIXEL_COUNT};
+    int y {cellIDX / constants::WIDTH_PIXEL_COUNT};
 
-void grid::updateSimulation(std::vector<entities::Cell> &cellGrid){
-
-    for(auto& cell : cellGrid) cell.updated_this_frame = false;
-
-    for(int yIdx{constants::HEIGHT_PIXEL_COUNT - 1}; yIdx >= 0; --yIdx) {
-        for (int xIdx{constants::WIDTH_PIXEL_COUNT - 1}; xIdx >= 0; --xIdx) {
-            const int cellIdx {calcCellIDX(xIdx, yIdx)};
-            if(cellGrid.at(cellIdx).updated_this_frame)
-            {
-                continue;
-            }
-            assert(cellIdx >= 0 && cellIdx < cellGrid.size());
-            const entities::Element& blueprint {
-                    (entities::ELEMENT_PROPERTIES[static_cast<std::size_t>(cellGrid.at(
-                            cellIdx).type)])};
-            if(!blueprint.m_isMovable){
-                continue; //Items that do not move don't move!
-            }
-            auto targetIDX {checkAdjacentCell(cellGrid, blueprint, xIdx, yIdx)};
-            if(!targetIDX){
-                cellGrid.at(cellIdx).updated_this_frame = true;
-                continue; //Nowhere to move!
-            }
-            entities::ElementType swap {cellGrid.at(*targetIDX).type};
-            cellGrid.at(*targetIDX).type = cellGrid.at(cellIdx).type;
-            cellGrid.at(cellIdx).type = swap;
-            cellGrid.at(*targetIDX).updated_this_frame = true;
-
-
+    for (auto [nx, ny]: neighbours) {
+        int ax = x+nx;
+        int ay = y+ny;
+        if (isValidIDX(ax, ay)) {
+            int neighbourIdx { calcCellIDX(ax,ay)};
+            grid::insertActiveCells(active, neighbourIdx);
         }
     }
+}
+
+void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active) {
+    auto start {std::chrono::high_resolution_clock::now()};
+    std::vector<int> to_inactive{};
+
+    for(auto& cell : active) cellGrid.at(cell).updated_this_frame = false;
+
+    for (int cellIDX: active) {
+        if (cellGrid.at(cellIDX).updated_this_frame) {
+            continue;
+        }
+        const int xIdx {cellIDX % constants::WIDTH_PIXEL_COUNT};
+        const int yIdx {cellIDX / constants::WIDTH_PIXEL_COUNT};
+
+        const entities::Element& blueprint {
+            (entities::ELEMENT_PROPERTIES[static_cast<std::size_t>(cellGrid.at(cellIDX).type)])};
+
+        if(!blueprint.m_isMovable){
+            continue; //Items that do not move, don't move!
+        }
+        auto targetIDX {checkAdjacentCell(cellGrid, blueprint, xIdx, yIdx)};
+        if(!targetIDX){
+            cellGrid.at(cellIDX).updated_this_frame = true;
+            if (cellGrid.at(cellIDX).frames_stationary < 3) {
+                cellGrid.at(cellIDX).frames_stationary++;
+            } else {
+                to_inactive.push_back(cellIDX);
+            }
+            continue; //Nowhere to move!
+        }
+        entities::ElementType swap {cellGrid.at(*targetIDX).type};
+        cellGrid.at(*targetIDX).type = cellGrid.at(cellIDX).type;
+        cellGrid.at(cellIDX).type = swap;
+        cellGrid.at(*targetIDX).updated_this_frame = true;
+        wakeNeighbour(cellGrid, active, cellIDX, grid::neighbours_middle_top);
+        wakeNeighbour(cellGrid, active, *targetIDX, grid::neighbours_middle_bot);
+
+    }
+
+    for (int cellIDX: to_inactive) {
+        active.erase(cellIDX);
+    }
+
+
+
+    auto end {std::chrono::high_resolution_clock::now()};
+    auto delta { std::chrono::duration_cast<std::chrono::microseconds>(end-start)};
+
+    total_time += delta.count();
+    frame_count++;
+
+    if (frame_count % 100 == 0) {
+        std::cout << "Average update time: " << (total_time / frame_count)
+                  << "microseconds\n";
+    }
+
 }
 
 //Essentially a bottom-up update looping the full grid to check for potential movements

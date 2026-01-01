@@ -32,12 +32,13 @@ namespace control{
                 screen_pos{GetMousePosition()} {};
 
         [[nodiscard]] Point positionToPoint() const;
+
         void updateMousePos();
         void drawMouseHover() const;
         void changeMouseElement(entities::ElementType type);
         std::string_view mouseModeToSV();
         void cycleMouseMode(bool clockwise);
-        static void mouseAction(/*mouseMode mode -- Implemented later!*/);
+        static void mouseAction(Mouse& mouse);
         [[nodiscard]] int getMouseCellIDX() const;
 
         //
@@ -56,8 +57,9 @@ namespace control{
 
     };
 
-    void placeGridElement(std::vector<entities::Cell>& Grid, Mouse& mouse);
-    void deleteGridElement(std::vector<entities::Cell>& Grid);
+    [[nodiscard]] int pointToCellIDX(Point& point);
+    void placeGridElement(std::vector<entities::Cell>& Grid, Point location);
+    void deleteGridElement(std::vector<entities::Cell>& Grid, Point location);
 
     extern Mouse mouse;
     constexpr std::array<Mouse::mouseMode,static_cast<std::size_t>(Mouse::mouseMode::MAX_MODES)> mouseModes = {

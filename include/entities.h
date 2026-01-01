@@ -96,8 +96,9 @@ namespace entities {
     struct Cell {
         ElementType type;
         bool updated_this_frame;
+        int frames_stationary;
 
-        Cell() : type{ElementType::AIR}, updated_this_frame{false} {};
+        Cell() : type{ElementType::AIR}, updated_this_frame{false}, frames_stationary {0} {};
         ~Cell() = default;
 
     };
