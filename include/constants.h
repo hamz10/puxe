@@ -13,8 +13,11 @@ namespace constants {
     constexpr static int HEIGHT_PIXEL_COUNT {WINDOW_HEIGHT/PIXEL_SIZE}; //50
     //constexpr static int GRAVITY {1};
     constexpr static int STATIC_DENSITY {999};
+    constexpr static std::uint16_t MAX_MOUSE_SIZE {3};
     constexpr static Color BK_CLR {DARKGRAY};
     constexpr static Color HOVER_CLR {BLUE};
+    constexpr static bool TRANSFORM_ELEM_PLACE {false};
+    constexpr static bool TRANSFORM_ELEM_DELETE {true};
 }
 
 #endif //GRIDRAY_CONSTANTS_H
