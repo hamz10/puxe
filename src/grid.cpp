@@ -11,8 +11,11 @@ void grid::initActiveCells(std::unordered_set<int>& active) {
 
 void grid::insertActiveCells(std::unordered_set<int>& active, int cellIDX) {
     active.insert(cellIDX);
-    entities::cellGrid.at(cellIDX).frames_stationary = 0;
+    if (entities::cellGrid.at(cellIDX).type != entities::ElementType::FIRE) {
+        entities::cellGrid.at(cellIDX).frames_stationary = 0;
+    }
 }
+
 
 void grid::drawGridLines(Color color) {
     int x{0};
@@ -62,22 +65,35 @@ std::optional<int> grid::isValidAdjacentCell(const std::vector<entities::Cell> &
 }
 
 std::optional<int> grid::checkAdjacentCell(const std::vector<entities::Cell> &cellGrid, const entities::Element& blueprint, const int& x, const int& y) {
-    auto cellIdx {isValidAdjacentCell(cellGrid, blueprint, x, y+1)};
+
+    int vert_dir = blueprint.m_density == 0 ? -1 : 1;
+
+    auto cellIdx {isValidAdjacentCell(cellGrid, blueprint, x, y+vert_dir)};
     if (cellIdx){
         return cellIdx;
     }
 
     const int direc {(Random::get(0,1))? 1 : -1};
     const std::array<int,2> offsets{direc, -direc};
-    for (int offset: offsets) {
-        if (auto idx {isValidAdjacentCell(cellGrid, blueprint, x+offset, y+1)}) {
-            return idx;
-        }
-    }
-    if (blueprint.m_density < 5) { //check lateral movements for liquids
+
+    if (blueprint.m_density == 0) {
         for (int offset: offsets) {
-            if (auto idx {isValidAdjacentCell(cellGrid, blueprint, x+offset, y)}) {
+            if (auto idx {isValidAdjacentCell(cellGrid, blueprint, x+offset, y-1)}) {
                 return idx;
+            }
+        }
+
+    } else {
+        for (int offset: offsets) {
+            if (auto idx {isValidAdjacentCell(cellGrid, blueprint, x+offset, y+1)}) {
+                return idx;
+            }
+        }
+        if (blueprint.m_density < 5) { //check lateral movements for liquids
+            for (int offset: offsets) {
+                if (auto idx {isValidAdjacentCell(cellGrid, blueprint, x+offset, y)}) {
+                    return idx;
+                }
             }
         }
     }
@@ -102,6 +118,37 @@ void grid::wakeNeighbour(std::vector<entities::Cell> &cellGrid, std::unordered_s
     }
 }
 
+void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int cellIDX, std::array<std::pair<int,int>,8>& neighbours) {
+    int x {cellIDX % constants::WIDTH_PIXEL_COUNT};
+    int y {cellIDX / constants::WIDTH_PIXEL_COUNT};
+    std::int16_t current_temp { cellGrid.at(cellIDX).temperature};
+    std::int16_t neighbour_avg_temp {0};
+    std::int16_t valid_neighbours {0};
+    for (auto [nx, ny]: neighbours) {
+        int ax = x+nx;
+        int ay = y+ny;
+        if (isValidIDX(ax, ay)) {
+            int neighbourIdx { calcCellIDX(ax,ay)};
+            neighbour_avg_temp += cellGrid.at(neighbourIdx).temperature;
+            valid_neighbours++;
+        }
+    }
+    neighbour_avg_temp /= valid_neighbours;
+
+    float equilibrium_delta = static_cast<float>(neighbour_avg_temp - current_temp) / constants::EQUILIBRIUM_RATE;
+    float cooling_delta = static_cast<float>(constants::AMBIENT_TEMPERATURE - current_temp) / constants::COOLING_RATE;
+    int16_t total_change = static_cast<int16_t>(equilibrium_delta + cooling_delta);
+
+    if (total_change == 0 && current_temp != constants::AMBIENT_TEMPERATURE) {
+        if (current_temp > constants::AMBIENT_TEMPERATURE) {
+            total_change = -1;
+        } else {
+            total_change = 1;
+        }
+    }
+    cellGrid.at(cellIDX).temperature = current_temp + total_change;
+}
+
 void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active) {
     auto start {std::chrono::high_resolution_clock::now()};
     std::vector<int> to_inactive{};
@@ -112,29 +159,54 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
         if (cellGrid.at(cellIDX).updated_this_frame) {
             continue;
         }
+
+        heatDiffuseNeighbour(cellGrid, cellIDX, grid::neighbours_all);
         const int xIdx {cellIDX % constants::WIDTH_PIXEL_COUNT};
         const int yIdx {cellIDX / constants::WIDTH_PIXEL_COUNT};
 
+        if (cellGrid.at(cellIDX).type == entities::ElementType::FIRE) {
+            cellGrid.at(cellIDX).temperature = constants::FIRE_TEMPERATURE;
+            cellGrid.at(cellIDX).frames_stationary++;  // Always increment
+
+            if (cellGrid.at(cellIDX).frames_stationary >= 5) {
+                cellGrid.at(cellIDX).type = entities::ElementType::AIR;
+                continue;
+            }
+        }
+
         const entities::Element& blueprint {
             (entities::ELEMENT_PROPERTIES[static_cast<std::size_t>(cellGrid.at(cellIDX).type)])};
+
 
         if(!blueprint.m_isMovable){
             continue; //Items that do not move, don't move!
         }
         auto targetIDX {checkAdjacentCell(cellGrid, blueprint, xIdx, yIdx)};
-        if(!targetIDX){
+        if(!targetIDX) {
             cellGrid.at(cellIDX).updated_this_frame = true;
-            if (cellGrid.at(cellIDX).frames_stationary < 3) {
-                cellGrid.at(cellIDX).frames_stationary++;
-            } else {
-                to_inactive.push_back(cellIDX);
+
+            // Only put non-FIRE elements to sleep
+            if (cellGrid.at(cellIDX).type != entities::ElementType::FIRE) {
+                if (cellGrid.at(cellIDX).frames_stationary < 3) {
+                    cellGrid.at(cellIDX).frames_stationary++;
+                } else if (cellGrid.at(cellIDX).temperature == constants::AMBIENT_TEMPERATURE) {
+                    to_inactive.push_back(cellIDX);
+                }
             }
-            continue; //Nowhere to move!
+            continue;
         }
+
         entities::ElementType swap {cellGrid.at(*targetIDX).type};
         cellGrid.at(*targetIDX).type = cellGrid.at(cellIDX).type;
         cellGrid.at(cellIDX).type = swap;
+
+        int temp_frames = cellGrid.at(*targetIDX).frames_stationary;
+        cellGrid.at(*targetIDX).frames_stationary = cellGrid.at(cellIDX).frames_stationary;
+        cellGrid.at(cellIDX).frames_stationary = temp_frames;
+
         cellGrid.at(*targetIDX).updated_this_frame = true;
+
+
         wakeNeighbour(cellGrid, active, cellIDX, grid::neighbours_middle_top);
         wakeNeighbour(cellGrid, active, *targetIDX, grid::neighbours_middle_bot);
 
@@ -143,8 +215,6 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
     for (int cellIDX: to_inactive) {
         active.erase(cellIDX);
     }
-
-
 
     auto end {std::chrono::high_resolution_clock::now()};
     auto delta { std::chrono::duration_cast<std::chrono::microseconds>(end-start)};

@@ -20,6 +20,7 @@ namespace entities {
         SAND,
         WATER,
         STONE,
+        FIRE,
         MAX_ELEM
     };
 
@@ -34,6 +35,8 @@ namespace entities {
                 return "WATER";
             case static_cast<std::size_t>(ElementType::STONE):
                 return "STONE";
+            case static_cast<std::size_t>(ElementType::FIRE):
+                return "FIRE";
             default: return "ERR";
         }
     }
@@ -90,15 +93,24 @@ namespace entities {
                 -1,
                 constants::STATIC_DENSITY,
                 false
-            }
+            },
+            Element{
+                ElementType::FIRE,
+                RED,
+                0,
+                0,
+                true
+        },
+
     };
 
     struct Cell {
         ElementType type;
         bool updated_this_frame;
-        int frames_stationary;
+        int frames_stationary; //fuel timer for fires
+        std::int16_t temperature;
 
-        Cell() : type{ElementType::AIR}, updated_this_frame{false}, frames_stationary {0} {};
+        Cell() : type{ElementType::AIR}, updated_this_frame{false}, frames_stationary {0}, temperature {constants::AMBIENT_TEMPERATURE} {};
         ~Cell() = default;
 
     };

@@ -22,6 +22,7 @@ void drawScreen(){
     grid::paintGrid(entities::cellGrid);
     control::mouse.drawMouseHover();
     grid::drawGridLines(BLACK);
+    control::mouse.drawMouseTemp();
     EndDrawing();
 }
 

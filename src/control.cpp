@@ -2,6 +2,7 @@
 // Created by Hamza Nisar on 16/12/2025.
 //
 #include <iostream>
+#include <string>
 #include "../include/control.h"
 #include "../include/grid.h"
 
@@ -24,6 +25,14 @@ namespace control {
         Point mousePoint {positionToPoint()};
         DrawRectangle(mousePoint.x * constants::PIXEL_SIZE, mousePoint.y * constants::PIXEL_SIZE, constants::PIXEL_SIZE,
                       constants::PIXEL_SIZE, constants::HOVER_CLR);
+    }
+
+    void Mouse::drawMouseTemp() const {
+        int hoverIDX {getMouseCellIDX()};
+        std::int16_t temperature { entities::cellGrid.at(hoverIDX).temperature};
+        std::string str { "    "};
+        std::to_chars(str.data(), str.data() + str.size(), temperature);
+        DrawText(str.c_str(), 50, 50, 20, BLACK );
     }
 
     void Mouse::changeMouseElement(entities::ElementType type){
@@ -109,6 +118,7 @@ namespace control {
             case KEY_TWO:
             case KEY_THREE:
             case KEY_FOUR:
+            case KEY_FIVE:
                 mouse.changeMouseElement(static_cast<entities::ElementType>(input - KEY_ONE));
                 break;
             case KEY_Q:
@@ -170,7 +180,9 @@ namespace control {
         if (Mode == constants::TRANSFORM_ELEM_PLACE) {
             if(Grid.at(cell_idx).type == entities::ElementType::AIR) {
                 Grid.at(cell_idx).type = mouse.current_element;
-                grid::insertActiveCells(grid::active_cells, cell_idx);
+                //grid::insertActiveCells(grid::active_cells, cell_idx);
+                Grid.at(cell_idx).frames_stationary = 0;  // Fresh placement
+                grid::active_cells.insert(cell_idx);
                 grid::wakeNeighbour(Grid, grid::active_cells, cell_idx, grid::neighbours_middle_bot);
                 }
             }

@@ -36,6 +36,7 @@ namespace control{
 
         void updateMousePos();
         void drawMouseHover() const;
+        void drawMouseTemp() const;
         void changeMouseElement(entities::ElementType type);
         void changeMouseSize(bool increase);
         [[nodiscard]] std::string_view mouseModeToSV() const;
