@@ -43,16 +43,16 @@ void grid::paintGrid(const std::vector<entities::Cell>& cellGrid){
     }
 }
 
-int grid::calcCellIDX(const int x, const int y){
+int grid::calcCellIDX(const int& x, const int& y){
     return y * constants::WIDTH_PIXEL_COUNT + x;
 }
 
-bool grid::isValidIDX(const int x, const int y){
+bool grid::isValidIDX(const int& x, const int& y){
 return((x >= 0 && x < constants::WIDTH_PIXEL_COUNT) && (y >= 0 && y <constants::HEIGHT_PIXEL_COUNT));
 }
 
 
-std::optional<int> grid::isValidAdjacentCell(const std::vector<entities::Cell> &cellGrid, const entities::Element& blueprint, const int x, const int y){
+std::optional<int> grid::isValidAdjacentCell(const std::vector<entities::Cell> &cellGrid, const entities::Element& blueprint, const int& x, const int& y){
     if (!isValidIDX(x, y))
         return std::nullopt;
     const int cellIdx {calcCellIDX(x, y)};
@@ -103,7 +103,7 @@ std::optional<int> grid::checkAdjacentCell(const std::vector<entities::Cell> &ce
 //MAKE TEMPLATED VERSION FOR DELETION OF BLOCK! WILL HAVE TO TURN ARRAY OF PAIRS INTO A PARAMETER RATHER THAN HARDCODED
 
 template <std::size_t N>
-void grid::wakeNeighbour(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active, const int cellIDX, std::array<std::pair<int,int>,N>& neighbours)
+void grid::wakeNeighbour(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active, const int& cellIDX, std::array<std::pair<int,int>,N>& neighbours)
      {
     int x {cellIDX % constants::WIDTH_PIXEL_COUNT};
     int y {cellIDX / constants::WIDTH_PIXEL_COUNT};
@@ -118,15 +118,15 @@ void grid::wakeNeighbour(std::vector<entities::Cell> &cellGrid, std::unordered_s
     }
 }
 
-void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int cellIDX, std::array<std::pair<int,int>,8>& neighbours) {
+void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int& cellIDX, std::array<std::pair<int,int>,8>& neighbours) {
     int x {cellIDX % constants::WIDTH_PIXEL_COUNT};
     int y {cellIDX / constants::WIDTH_PIXEL_COUNT};
     std::int16_t current_temp { cellGrid.at(cellIDX).temperature};
     std::int16_t neighbour_avg_temp {0};
     std::int16_t valid_neighbours {0};
     for (auto [nx, ny]: neighbours) {
-        int ax = x+nx;
-        int ay = y+ny;
+        int ax {x+nx};
+        int ay {y+ny};
         if (isValidIDX(ax, ay)) {
             int neighbourIdx { calcCellIDX(ax,ay)};
             neighbour_avg_temp += cellGrid.at(neighbourIdx).temperature;
@@ -135,9 +135,9 @@ void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int 
     }
     neighbour_avg_temp /= valid_neighbours;
 
-    float equilibrium_delta = static_cast<float>(neighbour_avg_temp - current_temp) / constants::EQUILIBRIUM_RATE;
-    float cooling_delta = static_cast<float>(constants::AMBIENT_TEMPERATURE - current_temp) / constants::COOLING_RATE;
-    int16_t total_change = static_cast<int16_t>(equilibrium_delta + cooling_delta);
+    float equilibrium_delta {static_cast<float>(neighbour_avg_temp - current_temp) / constants::EQUILIBRIUM_RATE};
+    float cooling_delta {static_cast<float>(constants::AMBIENT_TEMPERATURE - current_temp) / constants::COOLING_RATE};
+    auto total_change {static_cast<int16_t>(equilibrium_delta + cooling_delta)};
 
     if (total_change == 0 && current_temp != constants::AMBIENT_TEMPERATURE) {
         if (current_temp > constants::AMBIENT_TEMPERATURE) {
@@ -147,6 +147,18 @@ void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int 
         }
     }
     cellGrid.at(cellIDX).temperature = current_temp + total_change;
+}
+
+void grid::stateChangeCheck(std::vector<entities::Cell> &cellGrid, const int& cellIDX, const entities::Element& blueprint) {
+
+    if (blueprint.m_freezing_point != constants::NO_STATE_CHANGE && cellGrid.at(cellIDX).temperature < blueprint.m_freezing_point) {
+        cellGrid.at(cellIDX).type = blueprint.m_freezeIntoElement;
+    } else if (blueprint.m_ignition_point != constants::NO_STATE_CHANGE && cellGrid.at(cellIDX).temperature > blueprint.m_ignition_point) {
+        cellGrid.at(cellIDX).type = blueprint.m_igniteIntoElement;
+    } else if (blueprint.m_melting_point != constants::NO_STATE_CHANGE && cellGrid.at(cellIDX).temperature > blueprint.m_melting_point) {
+        cellGrid.at(cellIDX).type = blueprint.m_meltIntoElement;
+    }
+
 }
 
 void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active) {
@@ -160,6 +172,12 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
             continue;
         }
 
+        const entities::Element& blueprint {
+            (entities::ELEMENT_PROPERTIES[static_cast<std::size_t>(cellGrid.at(cellIDX).type)])};
+
+
+
+        stateChangeCheck(cellGrid, cellIDX, blueprint);
         heatDiffuseNeighbour(cellGrid, cellIDX, grid::neighbours_all);
         const int xIdx {cellIDX % constants::WIDTH_PIXEL_COUNT};
         const int yIdx {cellIDX / constants::WIDTH_PIXEL_COUNT};
@@ -174,13 +192,13 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
             }
         }
 
-        const entities::Element& blueprint {
-            (entities::ELEMENT_PROPERTIES[static_cast<std::size_t>(cellGrid.at(cellIDX).type)])};
+
 
 
         if(!blueprint.m_isMovable){
             continue; //Items that do not move, don't move!
         }
+
         auto targetIDX {checkAdjacentCell(cellGrid, blueprint, xIdx, yIdx)};
         if(!targetIDX) {
             cellGrid.at(cellIDX).updated_this_frame = true;

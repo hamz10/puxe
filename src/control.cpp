@@ -52,7 +52,7 @@ namespace control {
         }
     }
 
-    void Mouse::cycleMouseMode(bool clockwise) {
+    void Mouse::cycleMouseMode(bool clockwise) const {
     if (clockwise) {
         if (mouse.mode == mouseModes[static_cast<std::size_t>(Mouse::mouseMode::MAX_MODES) - 1]) {
         mouse.mode = mouseModes[0];
@@ -67,7 +67,6 @@ namespace control {
         }
     }
         std::cout << mouseModeToSV() << '\n';
-        return;
     }
 
     void changeMouseSize(bool increase) {

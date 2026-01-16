@@ -24,6 +24,8 @@ namespace entities {
         MAX_ELEM
     };
 
+    constexpr ElementType NULL_ELEMENT {ElementType::MAX_ELEM};
+
     inline std::string_view getElemSV(ElementType ID){
         assert(ID < ElementType::MAX_ELEM);
         switch (static_cast<std::size_t>(ID)) {
@@ -48,14 +50,28 @@ namespace entities {
         int m_weight;
         int m_density;
         bool m_isMovable;
+        std::int16_t m_melting_point;
+        ElementType m_meltIntoElement;
+        std::int16_t m_ignition_point;
+        ElementType m_igniteIntoElement;
+        std::int16_t m_freezing_point;
+        ElementType m_freezeIntoElement;
 
         constexpr Element() = delete;
-        constexpr Element(ElementType type, Color color, int weight, int density, bool movable) : // Default will be AIR
+        constexpr Element(ElementType type, Color color, int weight, int density, bool movable,
+                            std::int16_t melting_point, ElementType meltIntoElement, std::int16_t ignition_point,
+                            ElementType igniteIntoElement, std::int16_t freezing_point, ElementType freezeIntoElement) : // Default will be AIR
                 m_type{type},
                 m_color{color}, // Uses BK_CLR for visual consistency
                 m_weight{weight},
                 m_density{density},
-                m_isMovable{movable}
+                m_isMovable{movable},
+                m_melting_point{melting_point},
+                m_meltIntoElement{meltIntoElement},
+                m_ignition_point{ignition_point},
+                m_igniteIntoElement{igniteIntoElement},
+                m_freezing_point{freezing_point},
+                m_freezeIntoElement{freezeIntoElement}
         {};
         ~Element() = default;
 
@@ -71,35 +87,65 @@ namespace entities {
                 constants::BK_CLR,
                 -1,
                 -1,
-                false
+                false,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
             },
             Element{
                 ElementType::SAND,
                 YELLOW,
                 5,
                 5,
-                true
+                true,
+                100,
+                entities::ElementType::FIRE,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
             },
             Element{
                 ElementType::WATER,
                 BLUE,
                 3,
                 1,
-                true
+                true,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
             },
             Element{
                 ElementType::STONE,
                 GRAY,
                 -1,
                 constants::STATIC_DENSITY,
-                false
+                false,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
             },
             Element{
                 ElementType::FIRE,
                 RED,
                 0,
                 0,
-                true
+                true,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
         },
 
     };

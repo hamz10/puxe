@@ -6,6 +6,9 @@
 #define GRIDRAY_CONSTANTS_H
 #include "raylib.h"
 #include <cstdint>
+
+
+
 namespace constants {
     constexpr static int WINDOW_WIDTH  {1000};
     constexpr static int WINDOW_HEIGHT {1000};
@@ -20,6 +23,7 @@ namespace constants {
     constexpr static std::int16_t EQUILIBRIUM_RATE {5};
     constexpr static std::int16_t COOLING_RATE {20};
     constexpr static std::int16_t FIRE_TEMPERATURE {800};
+    constexpr static std::int16_t NO_STATE_CHANGE {-275};
     constexpr static std::uint8_t MAX_MOUSE_SIZE {3};
     constexpr static Color BK_CLR {DARKGRAY};
     constexpr static Color HOVER_CLR {BLUE};

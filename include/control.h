@@ -40,7 +40,7 @@ namespace control{
         void changeMouseElement(entities::ElementType type);
         void changeMouseSize(bool increase);
         [[nodiscard]] std::string_view mouseModeToSV() const;
-        void cycleMouseMode(bool clockwise);
+        void cycleMouseMode(bool clockwise) const;
         static void mouseAction(Mouse& mouse);
         [[nodiscard]] int getMouseCellIDX() const;
 
