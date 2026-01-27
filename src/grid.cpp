@@ -11,7 +11,7 @@ void grid::initActiveCells(std::unordered_set<int>& active) {
 
 void grid::insertActiveCells(std::unordered_set<int>& active, int cellIDX) {
     active.insert(cellIDX);
-    if (entities::cellGrid.at(cellIDX).type != entities::ElementType::FIRE) {
+    if (entities::cellGrid.at(cellIDX).type != entities::ElementType::FIRE && entities::cellGrid.at(cellIDX).type != entities::ElementType::FROST) {
         entities::cellGrid.at(cellIDX).frames_stationary = 0;
     }
 }
@@ -130,6 +130,7 @@ void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int&
         if (isValidIDX(ax, ay)) {
             int neighbourIdx { calcCellIDX(ax,ay)};
             neighbour_avg_temp += cellGrid.at(neighbourIdx).temperature;
+
             valid_neighbours++;
         }
     }
@@ -147,18 +148,22 @@ void grid::heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int&
         }
     }
     cellGrid.at(cellIDX).temperature = current_temp + total_change;
+
 }
 
-void grid::stateChangeCheck(std::vector<entities::Cell> &cellGrid, const int& cellIDX, const entities::Element& blueprint) {
+bool grid::stateChangeCheck(std::vector<entities::Cell> &cellGrid, const int& cellIDX, const entities::Element& blueprint) {
 
     if (blueprint.m_freezing_point != constants::NO_STATE_CHANGE && cellGrid.at(cellIDX).temperature < blueprint.m_freezing_point) {
         cellGrid.at(cellIDX).type = blueprint.m_freezeIntoElement;
+        return true;
     } else if (blueprint.m_ignition_point != constants::NO_STATE_CHANGE && cellGrid.at(cellIDX).temperature > blueprint.m_ignition_point) {
         cellGrid.at(cellIDX).type = blueprint.m_igniteIntoElement;
+        return true;
     } else if (blueprint.m_melting_point != constants::NO_STATE_CHANGE && cellGrid.at(cellIDX).temperature > blueprint.m_melting_point) {
         cellGrid.at(cellIDX).type = blueprint.m_meltIntoElement;
+        return true;
     }
-
+    return false;
 }
 
 void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active) {
@@ -177,13 +182,23 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
 
 
 
-        stateChangeCheck(cellGrid, cellIDX, blueprint);
+        if (stateChangeCheck(cellGrid, cellIDX, blueprint)) {
+            wakeNeighbour(cellGrid,active,cellIDX,neighbours_all);
+        }
         heatDiffuseNeighbour(cellGrid, cellIDX, grid::neighbours_all);
         const int xIdx {cellIDX % constants::WIDTH_PIXEL_COUNT};
         const int yIdx {cellIDX / constants::WIDTH_PIXEL_COUNT};
 
         if (cellGrid.at(cellIDX).type == entities::ElementType::FIRE) {
-            cellGrid.at(cellIDX).temperature = constants::FIRE_TEMPERATURE;
+            cellGrid.at(cellIDX).temperature += constants::FIRE_TEMPERATURE / 10;
+            cellGrid.at(cellIDX).frames_stationary++;  // Always increment
+
+            if (cellGrid.at(cellIDX).frames_stationary >= 5) {
+                cellGrid.at(cellIDX).type = entities::ElementType::AIR;
+                continue;
+            }
+        } else if (cellGrid.at(cellIDX).type == entities::ElementType::FROST) {
+            cellGrid.at(cellIDX).temperature += constants::FROST_TEMPERATURE / 10;
             cellGrid.at(cellIDX).frames_stationary++;  // Always increment
 
             if (cellGrid.at(cellIDX).frames_stationary >= 5) {
@@ -191,8 +206,6 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
                 continue;
             }
         }
-
-
 
 
         if(!blueprint.m_isMovable){
@@ -204,7 +217,7 @@ void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordere
             cellGrid.at(cellIDX).updated_this_frame = true;
 
             // Only put non-FIRE elements to sleep
-            if (cellGrid.at(cellIDX).type != entities::ElementType::FIRE) {
+            if (cellGrid.at(cellIDX).type != entities::ElementType::FIRE && cellGrid.at(cellIDX).type != entities::ElementType::FROST ) {
                 if (cellGrid.at(cellIDX).frames_stationary < 3) {
                     cellGrid.at(cellIDX).frames_stationary++;
                 } else if (cellGrid.at(cellIDX).temperature == constants::AMBIENT_TEMPERATURE) {

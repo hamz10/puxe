@@ -118,6 +118,9 @@ namespace control {
             case KEY_THREE:
             case KEY_FOUR:
             case KEY_FIVE:
+            case KEY_SIX:
+            case KEY_SEVEN:
+            case KEY_EIGHT:
                 mouse.changeMouseElement(static_cast<entities::ElementType>(input - KEY_ONE));
                 break;
             case KEY_Q:

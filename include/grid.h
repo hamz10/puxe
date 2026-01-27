@@ -8,7 +8,6 @@
 #include <optional>
 #include <unordered_set>
 #include <chrono>
-#include <iostream>
 #include "constants.h"
 #include "entities.h"
 
@@ -34,7 +33,7 @@ namespace grid {
     void paintGrid(const std::vector<entities::Cell> &cellGrid);
     template <std::size_t N> void wakeNeighbour(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active, const int& cellIDX, std::array<std::pair<int,int>,N>& direc);
     void heatDiffuseNeighbour(std::vector<entities::Cell> &cellGrid,const int& cellIDX, std::array<std::pair<int,int>,8>& direc);
-    void stateChangeCheck(std::vector<entities::Cell> &cellGrid, const int& cellIDX, const entities::Element& blueprint);
+    bool stateChangeCheck(std::vector<entities::Cell> &cellGrid, const int& cellIDX, const entities::Element& blueprint);
     void updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active);
 
     inline std::unordered_set<int> active_cells;

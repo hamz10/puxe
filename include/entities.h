@@ -21,6 +21,9 @@ namespace entities {
         WATER,
         STONE,
         FIRE,
+        WOOD,
+        ICE,
+        FROST,
         MAX_ELEM
     };
 
@@ -39,6 +42,12 @@ namespace entities {
                 return "STONE";
             case static_cast<std::size_t>(ElementType::FIRE):
                 return "FIRE";
+            case static_cast<std::size_t>(ElementType::WOOD):
+                return "WOOD";
+            case static_cast<std::size_t>(ElementType::ICE):
+                return "ICE";
+            case static_cast<std::size_t>(ElementType::FROST):
+                return "FROST";
             default: return "ERR";
         }
     }
@@ -101,8 +110,8 @@ namespace entities {
                 5,
                 5,
                 true,
-                100,
-                entities::ElementType::FIRE,
+                constants::NO_STATE_CHANGE,
+                NULL_ELEMENT,
                 constants::NO_STATE_CHANGE,
                 NULL_ELEMENT,
                 constants::NO_STATE_CHANGE,
@@ -118,8 +127,8 @@ namespace entities {
                 NULL_ELEMENT,
                 constants::NO_STATE_CHANGE,
                 NULL_ELEMENT,
-                constants::NO_STATE_CHANGE,
-                NULL_ELEMENT,
+                0,
+                ElementType::ICE,
             },
             Element{
                 ElementType::STONE,
@@ -147,6 +156,45 @@ namespace entities {
                 constants::NO_STATE_CHANGE,
                 NULL_ELEMENT,
         },
+        Element{
+            ElementType::WOOD,
+            BROWN,
+            -1,
+            constants::STATIC_DENSITY,
+            false,
+            100,
+            ElementType::FIRE,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+    },
+        Element{
+            ElementType::ICE,
+            SKYBLUE,
+            -1,
+            constants::STATIC_DENSITY,
+            false,
+            50,
+            ElementType::WATER,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+    },
+        Element{
+            ElementType::FROST,
+            LIGHTGRAY,
+            0,
+            0,
+            true,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+            constants::NO_STATE_CHANGE,
+            NULL_ELEMENT,
+    },
 
     };
 
