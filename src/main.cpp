@@ -5,10 +5,12 @@
 #include "../include/entities.h"
 #include "../include/control.h"
 #include "../include/grid.h"
+#include "../include/gui.h"
 #include "raylib.h"
 #include "raymath.h"
 #define RAYGUI_IMPLEMENTATION
-//#include "raygui.h"
+#include "raygui.h"
+
 
 void update(){
     control::mouse.updateMousePos();
@@ -23,6 +25,7 @@ void drawScreen(){
     control::mouse.drawMouseHover();
     grid::drawGridLines(BLACK);
     control::mouse.drawMouseTemp();
+    GUI::getInstance().openMenu();
     EndDrawing();
 }
 

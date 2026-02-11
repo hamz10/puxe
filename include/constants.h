@@ -30,6 +30,12 @@ namespace constants {
     constexpr static Color HOVER_CLR {BLUE};
     constexpr static bool TRANSFORM_ELEM_PLACE {false};
     constexpr static bool TRANSFORM_ELEM_DELETE {true};
+    //GUI CONSTANTS
+    constexpr static float MENU_WIDTH {200};
+    constexpr static float MENU_HEIGHT {300};
+    constexpr static float MENU_ORIGIN_X {50};
+    constexpr static float MENU_ORIGIN_Y {50};
+    constexpr static float BUTTON_WIDTH_HEIGHT {20};
 }
 
 #endif //GRIDRAY_CONSTANTS_H

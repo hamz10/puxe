@@ -141,6 +141,9 @@ namespace control {
             case KEY_EQUAL:
                 changeMouseSize(true);
                 break;
+            case KEY_M:
+                // Open and close menu
+                break;
             default:
                 break;
         }

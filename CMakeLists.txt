@@ -12,7 +12,9 @@ find_package(glfw3 CONFIG REQUIRED)
 add_executable(gridray src/main.cpp
         src/entities.cpp
         src/control.cpp
-        src/grid.cpp)
+        src/grid.cpp
+        include/gui.h
+        src/gui.cpp)
 
 target_include_directories(gridray PRIVATE ${raylib_INCLUDE_DIRS})
 
