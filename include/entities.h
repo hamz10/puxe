@@ -201,7 +201,7 @@ namespace entities {
     struct Cell {
         ElementType type;
         bool updated_this_frame;
-        int frames_stationary; //fuel timer for fires
+        std::int8_t frames_stationary; //fuel timer for fires
         std::int16_t temperature;
 
         Cell() : type{ElementType::AIR}, updated_this_frame{false}, frames_stationary {0}, temperature {constants::AMBIENT_TEMPERATURE} {};

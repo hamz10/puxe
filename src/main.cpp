@@ -6,10 +6,12 @@
 #include "../include/control.h"
 #include "../include/grid.h"
 #include "../include/gui.h"
+#include "../include/UDP_server.h"
 #include "raylib.h"
 #include "raymath.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+
 
 
 void update(){
@@ -17,6 +19,7 @@ void update(){
     control::UserInput::isValidKeyPressed();
     control::UserInput::isMouseDown();
     grid::updateSimulation(entities::cellGrid, grid::active_cells);
+    //Update server buffer here?
 }
 
 void drawScreen(){
@@ -31,6 +34,7 @@ void drawScreen(){
 
 void init() {
     grid::initActiveCells(grid::active_cells);
+    UDP_Server::getInstance().generate_socket();
 }
 
 int main() {

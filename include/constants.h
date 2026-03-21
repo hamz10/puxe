@@ -36,6 +36,8 @@ namespace constants {
     constexpr static float MENU_ORIGIN_X {50};
     constexpr static float MENU_ORIGIN_Y {50};
     constexpr static float BUTTON_WIDTH_HEIGHT {20};
+    //NETWORKING CONSTANTS
+    constexpr char* PORT {"4950"};
 }
 
 #endif //GRIDRAY_CONSTANTS_H

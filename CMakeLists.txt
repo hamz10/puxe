@@ -14,7 +14,9 @@ add_executable(gridray src/main.cpp
         src/control.cpp
         src/grid.cpp
         include/gui.h
-        src/gui.cpp)
+        src/gui.cpp
+        include/UDP_server.h
+        src/UDP_server.cpp)
 
 target_include_directories(gridray PRIVATE ${raylib_INCLUDE_DIRS})
 
