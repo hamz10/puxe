@@ -13,7 +13,6 @@
 #include <cassert>
 #include "constants.h"
 
-
 namespace entities {
     enum class ElementType {
         AIR,
@@ -214,6 +213,7 @@ namespace entities {
 
     void saveGridState(std::vector<Cell> &cellGrid);
     void loadGridState(std::vector<Cell> &cellGrid);
+    void UDPupdateGrid(std::vector<Cell> &cellGrid, Cell *buffer);
 }
 
 #endif //GRIDRAY_ENTITIES_H

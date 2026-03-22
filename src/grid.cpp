@@ -167,6 +167,7 @@ bool grid::stateChangeCheck(std::vector<entities::Cell> &cellGrid, const int& ce
 }
 
 void grid::updateSimulation(std::vector<entities::Cell> &cellGrid, std::unordered_set<int>& active) {
+
     auto start {std::chrono::high_resolution_clock::now()};
     std::vector<int> to_inactive{};
 

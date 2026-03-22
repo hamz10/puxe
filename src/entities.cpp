@@ -48,4 +48,8 @@ namespace entities {
 
     }
 
+    void entities::UDPupdateGrid(std::vector<Cell> &cellGrid, Cell *buffer) {
+        memmove(buffer, cellGrid.data(), cellGrid.size() * sizeof(Cell));
+    }
+
 }

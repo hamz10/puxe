@@ -13,6 +13,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <thread>
+#include "entities.h"
+#include "constants.h"
+#include "UDP_client.h"
 
 class UDP_Server {
     public:
@@ -26,15 +30,18 @@ class UDP_Server {
     };
 
 
+
     int sockfd;
-    char buffer[1024];
+    entities::Cell buffer[sizeof(entities::Cell) * constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT];
+    std::size_t bufsize {constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT * sizeof(entities::Cell)};
 
 
     public:
     UDP_Server(UDP_Server const&) = delete;
     void operator=(UDP_Server const&) = delete;
     int generate_socket();
-
+    void refresh_buffer(const std::vector<entities::Cell> &cellGrid);
+    void sendto_grid(int sockfd, const struct addrinfo *p);
 
 
 };
