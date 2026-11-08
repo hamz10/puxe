@@ -64,7 +64,7 @@ void UDP_Server::sendto_grid(int socket, const struct addrinfo *p) {
         while (payload > 0) {
 
             std::size_t to_send {std::min(payload, transmission_size)};
-            if ((numbytes = sendto(socket, buffer + currloc, to_send, 0,
+            if ((numbytes = sendto(socket, buffer + (currloc/sizeof(entities::Cell)), to_send, 0,
                 p->ai_addr, p->ai_addrlen)) == -1) {
                 std::cerr << "sendto error: " << std::endl;
                 std::cerr << strerror(errno) << std::endl;
@@ -74,7 +74,7 @@ void UDP_Server::sendto_grid(int socket, const struct addrinfo *p) {
             payload -= numbytes;
             std::cout << "bytes sent: " << numbytes << std::endl;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(64));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
 }
 
