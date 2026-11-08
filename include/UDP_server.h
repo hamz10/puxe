@@ -32,7 +32,7 @@ class UDP_Server {
 
 
     int sockfd;
-    entities::Cell buffer[sizeof(entities::Cell) * constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT];
+    entities::Cell buffer[constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT];
     std::size_t bufsize {constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT * sizeof(entities::Cell)};
 
 

@@ -34,7 +34,7 @@ class UDP_Client {
     int sockfd;
     struct sockaddr *m_their_addr;
     socklen_t m_their_addr_len;
-    entities::Cell buffer[sizeof(entities::Cell) * constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT];
+    entities::Cell buffer[constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT];
     std::size_t bufsize {constants::WIDTH_PIXEL_COUNT * constants::HEIGHT_PIXEL_COUNT * sizeof(entities::Cell)};
     std::mutex grid_mutex;
 

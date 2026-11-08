@@ -6,9 +6,6 @@
 int UDP_Server::generate_socket() {
     struct addrinfo hints {0}, *servinfo, *p;
 
-
-
-    //memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_DGRAM;
 
@@ -77,7 +74,7 @@ void UDP_Server::sendto_grid(int socket, const struct addrinfo *p) {
             payload -= numbytes;
             std::cout << "bytes sent: " << numbytes << std::endl;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        std::this_thread::sleep_for(std::chrono::milliseconds(64));
     }
 }
 
